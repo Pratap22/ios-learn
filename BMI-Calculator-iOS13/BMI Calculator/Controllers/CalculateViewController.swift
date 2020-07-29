@@ -24,12 +24,10 @@ class CalculateViewController: UIViewController {
     }
 
     @IBAction func heightSliderChanged(_ sender: UISlider) {
-        print("Height Slider value \(sender.value)")
         heightLabel.text = "\(String(format: "%.2f", sender.value)) m"
     }
     
     @IBAction func weightSliderChanged(_ sender: UISlider) {
-        print("Weight Slider value \( Int(sender.value))")
         weightLabel.text = "\(String(Int(sender.value)))Kg"
     }
     
