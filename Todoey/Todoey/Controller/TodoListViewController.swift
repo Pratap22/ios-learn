@@ -12,6 +12,11 @@ import CoreData
 class TodoListViewController: UITableViewController {
     
     var itemArray = [Item]()
+    var selectedCategory: Category? {
+        didSet {
+           loadItems()
+        }
+    }
     
     // Shared preference in swift
     let defaults = UserDefaults.standard
@@ -19,7 +24,6 @@ class TodoListViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        loadItems()
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -39,7 +43,7 @@ class TodoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         //alternate way
-        itemArray[indexPath.row].setValue(!itemArray[indexPath.row].done, forKey: "done")
+//        itemArray[indexPath.row].setValue(!itemArray[indexPath.row].done, forKey: "done")
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         
         //delete
@@ -64,6 +68,7 @@ class TodoListViewController: UITableViewController {
             let newItem = Item(context: self.context)
             newItem.title = textField.text!
             newItem.done = false
+            newItem.parentCategory = self.selectedCategory
             self.itemArray.append(newItem)
             
             self.saveData()
@@ -89,7 +94,15 @@ class TodoListViewController: UITableViewController {
     
     //also knows as default parameter in javascript
     //with request: NSFetchRequest<Item> = Item.fetchRequest()
-    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest()){
+    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil){
+        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
+        
+        if let additionalPredicate = predicate {
+            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additionalPredicate])
+        } else {
+            request.predicate = categoryPredicate
+        }
+        
         do {
             itemArray = try context.fetch(request)
         } catch {
